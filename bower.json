@@ -1,0 +1,26 @@
+{
+  "name": "reflux-router",
+  "description": "Simple routing for RefluxJS",
+  "main": "dist/reflux-router.js",
+  "authors": [
+    "Bryan Grezeszak <bryangrezeszak@mail.com>"
+  ],
+  "license": "MIT",
+  "keywords": [
+    "browser",
+    "router",
+    "routing",
+    "reflux",
+    "refluxjs",
+    "history",
+    "hashbang"
+  ],
+  "homepage": "https://github.com/BryanGrezeszak/reflux-router",
+  "ignore": [
+    "**/.*",
+    "node_modules",
+    "bower_components",
+    "test",
+    "tests"
+  ]
+}
