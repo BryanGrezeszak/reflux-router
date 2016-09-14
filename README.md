@@ -8,10 +8,10 @@ RefluxRouter is designed to make exceedingly easy routing for single page apps (
 
 - [Getting It](#getting-it)
 - [Overview / The Basics](#overview)
-- [RefluxRouter.defineRoute](#refluxrouter-defineroute)
-- [RefluxRouter.defineRouteState](#refluxrouter-defineroutestate)
-- [RefluxRouter.navigateTo](#refluxrouter-navigateto)
-- [RefluxRouter.initializeRouting](#refluxrouter-initializerouting)
+- [RefluxRouter.defineRoute](#refluxrouterdefineroute)
+- [RefluxRouter.defineRouteState](#refluxrouterdefineroutestate)
+- [RefluxRouter.navigateTo](#refluxrouternavigateto)
+- [RefluxRouter.initializeRouting](#refluxrouterinitializerouting)
 - [String vs. Regular Expression Routes](#string-vs-regular-expression-routes)
 
 ## Getting It
@@ -117,7 +117,7 @@ The fourth argument (or third if you don't pass arguments) is optional and is th
 
 *Note: this requires you are using the [Reflux ES6 API](https://www.npmjs.com/package/reflux-edge#react-es6-usage) patterns for both stores and components within your project in order to have a Reflux global state.*
 
-This operates under similar principal to [RefluxRouter.defineRoute](#refluxrouter-defineroute) directly above. Therefore only the differences will be noted here.
+This operates under similar principal to [RefluxRouter.defineRoute](#refluxrouterdefineroute) directly above. Therefore only the differences will be noted here.
 
 Functionally the major difference is that this method is about setting partial or full Reflux global state on a routing change instead of calling an action.
 
