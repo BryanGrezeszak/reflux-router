@@ -13,6 +13,8 @@ RefluxRouter is designed to make exceedingly easy routing for single page apps (
 - [RefluxRouter.navigateTo](#refluxrouternavigateto)
 - [RefluxRouter.initializeRouting](#refluxrouterinitializerouting)
 - [String vs. Regular Expression Routes](#string-vs-regular-expression-routes)
+- [Ensuring RefluxRouter has access to Reflux](#ensuring-refluxrouter-has-access-to-reflux)
+- [Handling the server side](#handling-the-server-side)
 
 ## Getting It
 
