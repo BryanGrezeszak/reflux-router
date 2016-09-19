@@ -1,4 +1,4 @@
-// v 1.0.0
+// v 1.0.1
 // By Bryan Grezeszak 2016
 // MIT License
 
@@ -27,6 +27,9 @@
 	// private static vars that store our route definitions
 	RefluxRouter._definedRoutes = {};
 	RefluxRouter._regexRoutes = [];
+	
+	// we need to remember the route marker for when we use navigateTo
+	RefluxRouter._routingMarker = null;
 
 	// fragments like "/page/" and "/page" should be treated as the same route,
 	// so internally this treats them all as having leading AND trailing
@@ -86,7 +89,7 @@
 		
 		// routingMarker and href should not have trailing slashes, since fragments will have leading ones
 		href = href.replace(/\/$/, '');
-		routingMarker = routingMarker.replace(/\/$/, '');
+		RefluxRouter._routingMarker = routingMarker = routingMarker.replace(/\/$/, '');
 		
 		var fragment, i = href.indexOf(routingMarker);
 		
@@ -214,7 +217,14 @@
 		
 		// push the new state into the history if it's not flagged noHistory
 		if (hasWin && !noHistory)
-			window.history.pushState({reflux_route:route}, (def ? def.title : regexTitle) || null, route);
+		{
+			// before we push the state we need to figure out what the full URL would be (using the routing marker)
+			var marker = RefluxRouter._routingMarker;
+			var href = location.href;
+			var preRoute = href.substring(0, href.indexOf(marker)+marker.length);
+			
+			window.history.pushState({reflux_route:route}, (def ? def.title : regexTitle) || null, preRoute+route);
+		}
 		
 		// if there was a def, set the state or do the actions and change tht title
 		if (def)
