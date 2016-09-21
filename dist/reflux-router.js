@@ -1,4 +1,4 @@
-// v 1.0.1
+// v 1.0.2
 // By Bryan Grezeszak 2016
 // MIT License
 
@@ -223,7 +223,9 @@
 			var href = location.href;
 			var preRoute = href.substring(0, href.indexOf(marker)+marker.length);
 			
-			window.history.pushState({reflux_route:route}, (def ? def.title : regexTitle) || null, preRoute+route);
+			var pushRoute = route===RefluxRouter._defaultRoute ? preRoute : preRoute+route;
+			
+			window.history.pushState({reflux_route:route}, (def ? def.title : regexTitle) || null, pushRoute);
 		}
 		
 		// if there was a def, set the state or do the actions and change tht title
