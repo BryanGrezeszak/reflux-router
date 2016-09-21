@@ -1,4 +1,4 @@
-// v 1.0.2
+// v 1.1.0
 // By Bryan Grezeszak 2016
 // MIT License
 
@@ -12,25 +12,27 @@
 }(this, function(){
 	"use strict";
 	
+	var ROUTE_MARKER_ERROR = 'Routing marker not found in current URL.';
+	
 	var RefluxRouter = {};
 	var _reflux = typeof Reflux !== 'undefined' ? Reflux : null;
-
+	
 	// if set to true then it will use hashes instead of HTML5 history, is set in initialize
 	var useHash = false;
 	var hashMarker = null;
-
+	
 	// for isomorphism (running on server and browser) we need to know
 	// if the window and document are available or not right now
 	var hasWin = typeof window === 'object';
 	var hasDoc = typeof document === 'object';
-
+	
 	// private static vars that store our route definitions
 	RefluxRouter._definedRoutes = {};
 	RefluxRouter._regexRoutes = [];
 	
 	// we need to remember the route marker for when we use navigateTo
 	RefluxRouter._routingMarker = null;
-
+	
 	// fragments like "/page/" and "/page" should be treated as the same route,
 	// so internally this treats them all as having leading AND trailing
 	// slashes, and this private function adds them if need be
@@ -41,7 +43,20 @@
 		
 		return route.replace(/^([^\/])|([^\/])$/g, '$2/$1');
 	}
-
+	
+	// once we have a well formed marker (i.e. after initialized) this can pull
+	// a current fragment from a url (not hash!)
+	function getFragment()
+	{
+		var href = window.location.href;
+		href = href.replace(/\/$/, '');
+		var routingMarker = RefluxRouter._routingMarker;
+		var i = href.indexOf(routingMarker);
+		if (i === -1)
+			throw new Error(ROUTE_MARKER_ERROR);
+		return slashify( href.substr(i+routingMarker.length) );
+	}
+	
 	// this handles the actual push state event from the browser that happens
 	// when the pages are changed, that's why there's the 2nd argument passed
 	// to the `navigateTo` method, that prevents it from adding the navigation
@@ -51,9 +66,9 @@
 		if (evt && evt.state && evt.state.reflux_route)
 			RefluxRouter.navigateTo(evt.state.reflux_route, true);
 		else
-			RefluxRouter.navigateTo(RefluxRouter._defaultRoute, true);
+			RefluxRouter.navigateTo(getFragment(), true);
 	}
-
+	
 	// if you used a routingMarker starting with # in your initialization then it uses hashes,
 	// and this is the function called on hash change
 	function onHashChange(evt)
@@ -69,7 +84,7 @@
 	{
 		_reflux = rflx;
 	}
-
+	
 	// RefluxRouter.initializeRouting(defaultRoute, routingMarker)
 	// RefluxRouter.initializeRouting(defaultRoute, routingMarker, manualRoute)
 	//
@@ -104,13 +119,12 @@
 		if (useHash && i === -1)
 			fragment = '/';
 		else if (i === -1)
-			throw new Error('Routing marker not found in current URL.');
+			throw new Error(ROUTE_MARKER_ERROR);
 		
 		fragment = fragment || slashify( href.substr(i+routingMarker.length) );
-		
 		return RefluxRouter.navigateTo(fragment, true);
 	}
-
+	
 	// RefluxRouter.defineRoute(route, action)
 	// RefluxRouter.defineRoute(route, action, title)
 	// RefluxRouter.defineRoute(route, action, argmnts)
@@ -174,6 +188,11 @@
 			RefluxRouter._regexRoutes.push({regex:route, state:state, title:title});
 		}
 	}
+	
+	// can be overridden to allow you to catch navigations to non-defined routes
+	// and handle them in a custom manner
+	// only is called when a route matches no defined routes at all (string or regex)
+	RefluxRouter.onUnknownRoute = function(route){}
 
 	// RefluxRouter.navigateTo(route)
 	// RefluxRouter.navigateTo(route, noHistory)
@@ -195,6 +214,7 @@
 		var regexTitle = '', regexDef;
 		
 		// if no def try the regexes instead
+		var regDef = false;
 		if (!def)
 		{
 			for (var i=0,ii=RefluxRouter._regexRoutes.length; i<ii; i++)
@@ -202,6 +222,8 @@
 				regexDef = RefluxRouter._regexRoutes[i];
 				if ( route.match(regexDef.regex) )
 				{
+					regDef = true;
+					
 					if (regexDef.action) {
 						regexDef.action.apply(null, regexDef.argmnts);
 					} else if (regexDef.state) {
@@ -241,6 +263,10 @@
 		var newTitle = (def && def.title) || regexTitle;
 		if (hasDoc && newTitle)
 			document.title = newTitle;
+		
+		// if no definition existed and no regex matched then we have an unknown fragment, and should tell the program that
+		if (!def && !regDef)
+			RefluxRouter.onUnknownRoute(route);
 		
 		// since title setting only works in browser, return the new title (if it exists, otherwise null)
 		// so that whatever non-browser entity can work with it

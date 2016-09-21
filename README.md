@@ -137,6 +137,22 @@ RefluxRouter.defineRouteState('/red/', {mystoreid:{color:'#ff0000'}});
 
 ------------------------
 
+### RefluxRouter.onUnknownRoute
+
+You define routes via strings and/or regular expressions, but what happens when the URL fragment doesn't match any of them?
+
+That's what `RefluxRouter.onUnknownRoute` is for. Simply override this function with your own function that expects the unknown route as an argument and it will get called every time an unknown route exists.
+
+```javascript
+RefluxRouter.onUnknownRoute = function(route)
+{
+	console.log(route) // <- /unknownroute/
+	doSomethingWith(route);
+}
+```
+
+------------------------
+
 ### RefluxRouter.initializeRouting
 
 This method should be called after all your route definitions are declared in order to start the routing itself.
