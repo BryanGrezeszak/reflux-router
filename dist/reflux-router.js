@@ -1,4 +1,4 @@
-// v 1.1.0
+// v 1.2.0
 // By Bryan Grezeszak 2016
 // MIT License
 
@@ -271,6 +271,15 @@
 		// since title setting only works in browser, return the new title (if it exists, otherwise null)
 		// so that whatever non-browser entity can work with it
 		return newTitle || null;
+	}
+	
+	// TODO: document here and in readme
+	RefluxRouter.getRoute = function()
+	{
+		if (useHash)
+			return slashify( location.hash.substr(hashMarker.length) );
+		else
+			return getFragment();
 	}
 
 	/*
