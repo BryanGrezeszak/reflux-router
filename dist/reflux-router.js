@@ -1,5 +1,5 @@
-// v 1.2.0
-// By Bryan Grezeszak 2016
+// v 1.3.0
+// By Bryan Grezeszak 2018
 // MIT License
 
 (function (root, factory) {
@@ -36,12 +36,17 @@
 	// fragments like "/page/" and "/page" should be treated as the same route,
 	// so internally this treats them all as having leading AND trailing
 	// slashes, and this private function adds them if need be
-	function slashify(route)
+	function slashify(route, trailing)
 	{
+		trailing = trailing !== false; // default true
+		
 		if (!route)
 			return '/';
 		
-		return route.replace(/^([^\/])|([^\/])$/g, '$2/$1');
+		if (trailing)
+			return route.replace(/^([^\/])|([^\/])$/g, '$2/$1');
+		else
+			return route.replace(/^([^\/])/, '/$1').replace(/\/$/, '');
 	}
 	
 	// once we have a well formed marker (i.e. after initialized) this can pull
@@ -54,7 +59,7 @@
 		var i = href.indexOf(routingMarker);
 		if (i === -1)
 			throw new Error(ROUTE_MARKER_ERROR);
-		return slashify( href.substr(i+routingMarker.length) );
+		return slashify( href.substr(i+routingMarker.length), RefluxRouter.trailingSlash );
 	}
 	
 	// this handles the actual push state event from the browser that happens
@@ -76,6 +81,10 @@
 		var route = location.hash.substr(hashMarker.length);
 		RefluxRouter.navigateTo(route, true);
 	}
+	
+	// all routes whether `/blah/` `blah` `/blah` or `blah/` need to be treated same
+	// we can either treat all as `/blah/` (true) or `/blah` (false), which is determined here
+	RefluxRouter.trailingSlash = true;
 	
 	// RefluxRouter.defineReflux(rflx)
 	// 
@@ -99,7 +108,7 @@
 	// but for other environments you will need that data to set it yourself.
 	RefluxRouter.initializeRouting = function(defaultRoute, routingMarker, manualRoute)
 	{
-		RefluxRouter._defaultRoute = slashify(defaultRoute);
+		RefluxRouter._defaultRoute = slashify(defaultRoute, RefluxRouter.trailingSlash);
 		var href = manualRoute || (hasWin ? window.location.href : '');
 		
 		// routingMarker and href should not have trailing slashes, since fragments will have leading ones
@@ -121,7 +130,7 @@
 		else if (i === -1)
 			throw new Error(ROUTE_MARKER_ERROR);
 		
-		fragment = fragment || slashify( href.substr(i+routingMarker.length) );
+		fragment = fragment || slashify( href.substr(i+routingMarker.length), RefluxRouter.trailingSlash );
 		return RefluxRouter.navigateTo(fragment, true);
 	}
 	
@@ -155,7 +164,7 @@
 		}
 		
 		if (typeof route === 'string') {
-			route = slashify(route);
+			route = slashify(route, RefluxRouter.trailingSlash);
 			RefluxRouter._definedRoutes[route] = {action:action, argmnts:argmnts, title:title};
 		} else { // assumes it's a regex, the only other valid option if not a string
 			RefluxRouter._regexRoutes.push({regex:route, action:action, argmnts:argmnts, title:title});
@@ -182,7 +191,7 @@
 			return;
 		}
 		if (typeof route === 'string') {
-			route = slashify(route);
+			route = slashify(route, RefluxRouter.trailingSlash);
 			RefluxRouter._definedRoutes[route] = {state:state, title:title};
 		} else { // assumes it's a regex
 			RefluxRouter._regexRoutes.push({regex:route, state:state, title:title});
@@ -204,9 +213,9 @@
 	// internal use and, if `true`, means that it will not add this route change
 	// to the browser's history. It returns the resulting page title for that route
 	// (or null if there isn't one) in order to allow non-browser implementations to utilize it.
-	RefluxRouter.navigateTo = function(route, noHistory)
+	RefluxRouter.navigateTo = function(route, noHistory, replace)
 	{
-		route = slashify(route);
+		route = slashify(route, RefluxRouter.trailingSlash);
 		if (route === '/' || !route)
 			route = RefluxRouter._defaultRoute
 		
@@ -247,7 +256,10 @@
 			
 			var pushRoute = route===RefluxRouter._defaultRoute ? preRoute : preRoute+route;
 			
-			window.history.pushState({reflux_route:route}, (def ? def.title : regexTitle) || null, pushRoute);
+			if (replace)
+				window.history.replaceState({reflux_route:route}, (def ? def.title : regexTitle) || null, pushRoute);
+			else
+				window.history.pushState({reflux_route:route}, (def ? def.title : regexTitle) || null, pushRoute);
 		}
 		
 		// if there was a def, set the state or do the actions and change tht title
@@ -273,11 +285,22 @@
 		return newTitle || null;
 	}
 	
+	// RefluxRouter.redirectTo(route)
+	//
+	// Operetes like RefluxRouter.navigateTo except that it replaces
+	// the history instead of pushing new. That way you can navigate
+	// without adding a history entry
+	// NOTE: not fully cross-browser in some mobiles, therefore undocumented
+	RefluxRouter.redirectTo = function(route)
+	{
+		return RefluxRouter.navigateTo(route, false, true);
+	}
+	
 	// TODO: document here and in readme
 	RefluxRouter.getRoute = function()
 	{
 		if (useHash)
-			return slashify( location.hash.substr(hashMarker.length) );
+			return slashify( location.hash.substr(hashMarker.length), RefluxRouter.trailingSlash );
 		else
 			return getFragment();
 	}

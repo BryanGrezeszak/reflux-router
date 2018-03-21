@@ -1,8 +1,8 @@
 {
   "name": "reflux-router",
-  "version": "1.2.0",
+  "version": "1.3.0",
   "description": "Simple routing for RefluxJS",
-  "main": "dist/reflux-router.js",
+  "main": "dist/reflux-router.min.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },

@@ -2,7 +2,7 @@
 
 RefluxRouter is designed to make exceedingly easy routing for single page apps (history API or hashes) when mixed with RefluxJS usage.
 
-> Note: this currently requires features only found in the [reflux-edge](https://www.npmjs.com/package/reflux-edge) version of Reflux on npm.
+> Note: this currently requires features only found in the ES6 capable versions of Reflux (i.e. any non-zero major version number).
 
 ## Content
 
@@ -27,6 +27,8 @@ and then use it with CommonJS:
 `var RefluxRouter = require('reflux-router');`
 
 For usage in CommonJS note [this section](#ensuring-refluxrouter-has-access-to-reflux) for making sure it can access Reflux.
+
+Or you can import via CDN at: `https://cdn.jsdelivr.net/npm/reflux-router@1.3.0/dist/reflux-router.min.js`
 
 **Or** you can simply grab the `reflux-router.js` or `reflux-router.min.js` file from the `dist` folder in the [GitHub Repo](https://github.com/BryanGrezeszak/reflux-router) and script tag it into your project, where a global `RefluxRouter` variable will be available.
 
@@ -191,6 +193,12 @@ The router needs to know when your page changes between routed parts in order to
 However...if you think about it making an API to do that doesn't make a lot of sense. The router is already tracking the URL and letting your program know what to do...so why does it need to track your program to tell the URL what to do? The program just needs to change the URL itself and then the router will handle pushing that back to the program, and then they both inherently stay in sync.
 
 So when navigating between routed parts of your program don't call the action or set the global state. Simply call `RefluxRouter.navigateTo('/my/page/here');` and let the router do the calling of those things as defined by your route definitions.
+
+---------------------
+
+### RefluxRouter.trailingSlash
+
+All routes whether `/blah/` `blah` `/blah` or `blah/` need to be treated same. We can either treat all as `/blah/` (true) or `/blah` (false), which is determined here (default = true).
 
 ---------------------
 

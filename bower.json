@@ -1,7 +1,7 @@
 {
   "name": "reflux-router",
   "description": "Simple routing for RefluxJS",
-  "main": "dist/reflux-router.js",
+  "main": "dist/reflux-router.min.js",
   "authors": [
     "Bryan Grezeszak <bryangrezeszak@mail.com>"
   ],
